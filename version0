@@ -1,0 +1,61 @@
+import asyncio
+from telegram import Bot
+from telethon import TelegramClient, events
+
+# --- CONFIGURATION ---
+
+BOT_TOKEN = "8304094099:AAGScc9NVk1rSwfUqgvJVgDUK6hkhHVjnqw"
+
+# Telethon API credentials (get from https://my.telegram.org)
+API_ID = 24739472  # <-- REPLACE with your API ID
+API_HASH = "daa461126c24d9e3559f3e801e595fcc"  # <-- REPLACE with your API HASH
+
+# Your target channel username or ID (where to repost)
+TARGET_CHANNEL = "@envbackwood"  # <-- REPLACE with your channel username or ID
+
+# List of source channels to monitor
+SOURCE_CHANNELS = [
+    "https://t.me/dabb4ckwood",
+    "https://t.me/dabbackwoodsyka",
+    "https://t.me/baddackwood",
+    "https://t.me/tyrbopacani",
+    "https://t.me/lil1semmi",
+    "https://t.me/chermak1",
+    "https://t.me/veizu_true0",
+    "https://t.me/lildr04ill",
+    "https://t.me/Talk1ngtoYourselF",
+    "https://t.me/synthol_ww",
+    "https://t.me/olegbebe"
+]
+
+# --- END CONFIGURATION ---
+
+# Convert channel URLs to usernames
+def extract_username(url):
+    if url.startswith("https://t.me/"):
+        return url.split("/")[-1]
+    return url
+
+SOURCE_USERNAMES = [extract_username(url) for url in SOURCE_CHANNELS]
+
+async def main():
+    # Start Telethon client
+    client = TelegramClient("session_name", API_ID, API_HASH)
+    await client.start()
+    bot = Bot(BOT_TOKEN)
+
+    # Handler for new messages in source channels
+    @client.on(events.NewMessage(chats=SOURCE_USERNAMES))
+    async def handler(event):
+        try:
+            # Forward the message to the target channel
+            await client.forward_messages(TARGET_CHANNEL, event.message)
+        except Exception as e:
+            print(f"Error forwarding message: {e}")
+
+    print("Listening for new posts in source channels...")
+    await client.run_until_disconnected()
+
+if __name__ == "__main__":
+    # Run the main async function
+    asyncio.run(main())
